@@ -3,33 +3,57 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Milky-Way: Precision Screening</title>
+    <title>Milky-Way | Precision Diabetes AI</title>
     <link rel="stylesheet" href="/static/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
     <div class="container">
-        <h1>🌌 Milky-Way AI</h1>
-        <p>ระบบคัดกรองเบาหวานอัจฉริยะ</p>
-        
+        <header>
+            <div class="badge">Prevention Key 2025</div>
+            <h1>Milky-Way AI</h1>
+            <p>ระบบคัดกรองเบาหวานอัจฉริยะผ่านร้านยาชุมชน</p>
+        </header>
+
         <div class="card">
+            <div class="input-row">
+                <div class="input-group">
+                    <label>น้ำหนัก (kg)</label>
+                    <input type="number" id="weight" placeholder="65.0" step="0.1">
+                </div>
+                <div class="input-group">
+                    <label>ส่วนสูง (cm)</label>
+                    <input type="number" id="height" placeholder="170.0" step="0.1">
+                </div>
+            </div>
+
             <div class="input-group">
-                <label>ระดับน้ำตาล (Glucose)</label>
+                <label>รอบเอว (cm) <small>(เพื่อคำนวณ WtHR)</small></label>
+                <input type="number" id="waist" placeholder="80.0">
+            </div>
+
+            <div class="input-group">
+                <div class="label-flex">
+                    <label>ระดับน้ำตาล (mg/dL)</label>
+                    <label class="toggle-label">
+                        <input type="checkbox" id="no_glucose" onchange="toggleGlucose(this)"> ไม่ทราบผล
+                    </label>
+                </div>
                 <input type="number" id="glucose" value="100">
             </div>
+
             <div class="input-group">
-                <label>BMI</label>
-                <input type="number" id="bmi" value="23.0">
-            </div>
-            <div class="input-group">
-                <label>อายุ</label>
+                <label>อายุ (ปี)</label>
                 <input type="number" id="age" value="25">
             </div>
-            <button onclick="checkRisk()">วิเคราะห์ความเสี่ยง</button>
-        </div>
 
-        <div id="result-box" class="result-box hidden">
-            <span id="result-text"></span>
+            <button onclick="checkRisk()">วิเคราะห์ความเสี่ยงเชิงรุก</button>
+
+            <div id="result-box" class="result-box">
+                <div id="result-text"></div>
+            </div>
         </div>
+        <footer>ยกระดับคุณภาพชีวิตอย่างยั่งยืน โดยทีม Milky-Way</footer>
     </div>
     <script src="/static/script.js"></script>
 </body>

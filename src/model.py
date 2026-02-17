@@ -26,7 +26,7 @@ class DiabetesAI:
         joblib.dump(self.model, self.model_path)
         return "Training Success!"
 
-    def predict(self, features):
+    def predict_proba(self, features):
         """
         features: list ของค่าสุขภาพ เช่น [Pregnancies, Glucose, BloodPressure, ...]
         """
