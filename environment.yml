@@ -12,7 +12,6 @@ dependencies:
   - joblib
   - pip
   - pip:
-      - streamlit
       - fastapi
       - uvicorn
       - pydantic
