@@ -1,4 +1,4 @@
-# Python
+# Python - ไฟล์ระบบที่ไม่จำเป็น
 __pycache__/
 *.py[cod]
 *$py.class
@@ -7,10 +7,12 @@ env/
 venv/
 ENV/
 
-# Data & Models (ไม่ควรเอา dataset ใหญ่ๆ หรือ pkl ขึ้นถ้าไม่จำเป็น)
-*.csv
-*.pkl
-*.model
+# Data & Models - ปลดล็อกให้ไฟล์ขึ้น GitHub เพื่อให้ Render นำไปใช้งานได้
+# ปิดการ ignore ไฟล์เหล่านี้โดยใส่เครื่องหมาย # ไว้ข้างหน้า
+# *.csv
+# *.pkl
+# *.model
 
-# OS
+# OS - ไฟล์ระบบของคอมพิวเตอร์
 .DS_Store
+Thumbs.db
