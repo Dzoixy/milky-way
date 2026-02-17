@@ -1,0 +1,16 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+env/
+venv/
+ENV/
+
+# Data & Models (ไม่ควรเอา dataset ใหญ่ๆ หรือ pkl ขึ้นถ้าไม่จำเป็น)
+*.csv
+*.pkl
+*.model
+
+# OS
+.DS_Store
