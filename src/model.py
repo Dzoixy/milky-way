@@ -1,35 +1,65 @@
-import joblib
-import pandas as pd
-from sklearn.ensemble import RandomForestClassifier
-import os
+# src/model.py
+import math
 
 class DiabetesAI:
-    def __init__(self, model_path='model/diabetes_model.pkl'):
-        self.model_path = model_path
-        self.model = self._load_model()
+    def __init__(self):
+        # ในอนาคตสามารถโหลดไฟล์ .pkl ตรงนี้ได้
+        # self.model = pickle.load(open('model/diabetes_model.pkl', 'rb'))
+        pass
 
-    def _load_model(self):
-        # ตรวจสอบว่ามีไฟล์ model หรือยัง
-        if os.path.exists(self.model_path):
-            return joblib.load(self.model_path)
-        # ถ้าไม่มี ให้เตรียมโครงสร้าง Model ไว้ (รอการ Train)
-        return RandomForestClassifier(n_estimators=100, random_state=42)
-
-    def train(self, df):
-        # สมมติว่าไฟล์ CSV มีคอลัมน์ 'Outcome' เป็นเป้าหมาย
-        X = df.drop('Outcome', axis=1)
-        y = df['Outcome']
-        self.model.fit(X, y)
+    def predict_risk(self, data):
+        """
+        Input: data (Object) contains weight, height, waist, glucose, age
+        Output: dict with risk_level, message, action_type
+        """
+        # 1. คำนวณค่าสัดส่วน
+        height_m = data.height / 100
+        if height_m == 0: height_m = 1.7
         
-        # สร้างโฟลเดอร์ถ้ายังไม่มี
-        os.makedirs(os.path.dirname(self.model_path), exist_ok=True)
-        joblib.dump(self.model, self.model_path)
-        return "Training Success!"
+        bmi = round(data.weight / (height_m ** 2), 2)
+        wthr = round(data.waist / data.height, 2)
+        
+        # 2. Strategic Logic (หัวใจสำคัญของระบบ)
+        risk_score = 0
+        action_type = "low"
+        message = ""
 
-    def predict_proba(self, features):
-        """
-        features: list ของค่าสุขภาพ เช่น [Pregnancies, Glucose, BloodPressure, ...]
-        """
-        # ทายผลเป็นความน่าจะเป็น (Probability) เพื่อใช้จัดกลุ่ม เสี่ยงต่ำ/กลาง/สูง
-        prob = self.model.predict_proba([features])[0][1]
-        return prob
+        # กรณี: ไม่ทราบค่าน้ำตาล (Glucose = 0)
+        # AI จะใช้ BMI และ WtHR ประเมินแทน
+        if data.glucose == 0:
+            if bmi > 25 or wthr > 0.55:
+                # รูปร่างเสี่ยงสูง -> ต้องเจาะเลือด
+                risk_score = 80
+                action_type = "urgent_test"
+                message = f"⚠️ <b>พบความเสี่ยงจากรูปร่าง (BMI {bmi}):</b><br>AI ประเมินว่าคุณมีความเสี่ยงสูง แนะนำให้<b>ตรวจน้ำตาลปลายนิ้ว (POCT)</b> ทันที"
+            elif bmi > 23 or wthr > 0.5:
+                risk_score = 45
+                action_type = "medium"
+                message = f"🟡 <b>ความเสี่ยงปานกลาง:</b><br>รูปร่างเริ่มท้วม แนะนำคุมแป้ง/น้ำตาล และสังเกตอาการ"
+            else:
+                risk_score = 15
+                action_type = "low"
+                message = f"🟢 <b>ความเสี่ยงต่ำ:</b><br>รูปร่างสมส่วน สุขภาพดี ให้รักษามาตรฐานต่อไป"
+        
+        # กรณี: ทราบค่าน้ำตาลแล้ว
+        else:
+            if data.glucose >= 126:
+                risk_score = 95
+                action_type = "high"
+                message = f"🔴 <b>ความเสี่ยงสูง (High Risk):</b><br>ค่าน้ำตาล {data.glucose} บ่งชี้ภาวะเบาหวาน ควรพบแพทย์"
+            elif data.glucose >= 100:
+                risk_score = 60
+                action_type = "medium"
+                message = f"🟠 <b>ภาวะก่อนเบาหวาน (Pre-Diabetes):</b><br>น้ำตาลสูงกว่าปกติ เริ่มมีความเสี่ยง"
+            else:
+                risk_score = 10
+                action_type = "low"
+                message = f"🟢 <b>ผลเลือดปกติ:</b><br>ยอดเยี่ยม! รักษาสุขภาพต่อไป"
+
+        return {
+            "bmi": bmi,
+            "wthr": wthr,
+            "risk_score": risk_score,
+            "action_type": action_type, # ใช้เปลี่ยนสี UI
+            "message": message
+        }

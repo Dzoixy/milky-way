@@ -1,44 +1,79 @@
-function toggleGlucose(checkbox) {
-    const input = document.getElementById('glucose');
-    input.disabled = checkbox.checked;
-    if(checkbox.checked) input.value = "";
+// src/static/script.js
+
+// ฟังก์ชันเปิด/ปิดช่องกรอกน้ำตาล
+function toggleGlucose() {
+    const isUnknown = document.getElementById('unknown_glucose').checked;
+    const glucoseInput = document.getElementById('glucose');
+    
+    if (isUnknown) {
+        glucoseInput.value = '';
+        glucoseInput.disabled = true;
+        glucoseInput.placeholder = "ใช้ AI ประเมินจากรูปร่าง";
+    } else {
+        glucoseInput.disabled = false;
+        glucoseInput.placeholder = "100";
+    }
 }
 
-async function checkRisk() {
-    const isNoGlucose = document.getElementById('no_glucose').checked;
-    const data = {
-        weight: parseFloat(document.getElementById('weight').value),
-        height: parseFloat(document.getElementById('height').value),
-        waist: parseFloat(document.getElementById('waist').value),
-        glucose: isNoGlucose ? 0 : parseFloat(document.getElementById('glucose').value),
-        age: parseInt(document.getElementById('age').value)
-    };
+// ฟังก์ชันส่งข้อมูลไป Backend
+async function analyzeRisk() {
+    const weight = parseFloat(document.getElementById('weight').value);
+    const height = parseFloat(document.getElementById('height').value);
+    const waist = parseFloat(document.getElementById('waist').value);
+    const age = parseInt(document.getElementById('age').value);
+    
+    // จัดการค่าน้ำตาล
+    let glucose = 0;
+    if (!document.getElementById('unknown_glucose').checked) {
+        glucose = parseFloat(document.getElementById('glucose').value);
+    }
 
-    if(!data.weight || !data.height || !data.waist) {
-        alert("กรุณากรอกข้อมูลสัดส่วนร่างกายให้ครบถ้วนเพื่อความแม่นยำสูง");
+    // Validation เบื้องต้น
+    if (!weight || !height || !waist || !age) {
+        alert("กรุณากรอกข้อมูลสัดส่วนร่างกายให้ครบถ้วน");
         return;
     }
 
-    const response = await fetch('/predict', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data)
-    });
+    const payload = {
+        weight: weight,
+        height: height,
+        waist: waist,
+        glucose: glucose ? glucose : 0,
+        age: age
+    };
 
-    const result = await response.json();
-    const resBox = document.getElementById('result-box');
-    const resText = document.getElementById('result-text');
+    try {
+        const response = await fetch('/predict', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(payload)
+        });
 
-    resBox.className = 'result-box'; // Reset
-    resText.innerHTML = `
-        <div style="font-size: 0.8rem; opacity: 0.9; margin-bottom: 5px;">ผลวิเคราะห์ระดับบุคคล (N=1)</div>
-        <div style="font-size: 1.4rem; font-weight: 800;">ความเสี่ยง ${result.risk_percent}%</div>
-        <div style="font-size: 0.85rem; margin: 10px 0;">BMI: ${result.bmi} | WtHR: ${result.wthr}</div>
-        <div style="font-size: 0.95rem; font-weight: 600; padding: 10px; background: rgba(0,0,0,0.1); border-radius: 10px;">${result.advice}</div>
-    `;
+        const result = await response.json();
+        displayResult(result);
 
-    resBox.style.display = 'block';
-    if (result.risk_percent > 70) resBox.classList.add('risk-high');
-    else if (result.risk_percent > 30) resBox.classList.add('risk-med');
-    else resBox.classList.add('risk-low');
+    } catch (error) {
+        console.error('Error:', error);
+        alert('เกิดข้อผิดพลาดในการเชื่อมต่อระบบ');
+    }
+}
+
+function displayResult(data) {
+    const resultArea = document.getElementById('resultArea');
+    const scoreVal = document.getElementById('scoreVal');
+    const messageBox = document.getElementById('resultMessage');
+    
+    // Reset classes
+    resultArea.className = 'result-visible status-' + data.action_type;
+    
+    // Set Data
+    scoreVal.innerText = data.risk_score;
+    messageBox.innerHTML = data.message;
+    document.getElementById('bmiVal').innerText = data.bmi;
+    document.getElementById('wthrVal').innerText = data.wthr;
+
+    // Scroll to result
+    resultArea.scrollIntoView({ behavior: 'smooth' });
 }

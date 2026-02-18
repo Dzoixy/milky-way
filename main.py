@@ -1,58 +1,37 @@
-from fastapi import FastAPI, Request
+# main.py
+from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
-from fastapi.templating import Jinja2Templates
+from fastapi.responses import FileResponse
 from pydantic import BaseModel
-from src.model import DiabetesAI
+from src.model import DiabetesAI # เรียกใช้ Logic จากไฟล์ model
 import uvicorn
+import os
 
 app = FastAPI()
-app.mount("/static", StaticFiles(directory="static"), name="static")
-templates = Jinja2Templates(directory="static")
 
+# Mount โฟลเดอร์ static เพื่อให้เรียกใช้ css/js ได้
+app.mount("/static", StaticFiles(directory="static"), name="static")
+# เริ่มต้น AI Engine
 ai_engine = DiabetesAI()
 
+# รูปแบบข้อมูลที่รับจากหน้าบ้าน
 class HealthInput(BaseModel):
     weight: float
     height: float
     waist: float
-    glucose: float # รับค่า 0 หากผู้ใช้ไม่ทราบผล
+    glucose: float
     age: int
-    family_history: float = 0.5
 
+# Route หลัก: เปิดหน้าเว็บ (ดึงไฟล์จาก src/static/index.html)
 @app.get("/")
-async def read_index(request: Request):
-    return templates.TemplateResponse("index.html", {"request": request})
+async def read_index():
+    return FileResponse('src/static/index.html')
 
+# API สำหรับคำนวณ
 @app.post("/predict")
 async def predict_risk(data: HealthInput):
-    # Strategic Screening: หากไม่ทราบค่าน้ำตาล ให้ใช้ค่าฐานที่ 100 mg/dL
-    actual_glucose = data.glucose if data.glucose > 0 else 100.0
-    
-    height_m = data.height / 100
-    bmi = round(data.weight / (height_m ** 2), 2)
-    wthr = round(data.waist / data.height, 2)
-    
-    # AI-Powered Screening ประมวลผล 8 Features
-    features = [0, actual_glucose, 80, 20, 0, bmi, data.family_history, data.age]
-    risk_prob = ai_engine.predict_proba(features)
-    risk_percent = round(risk_prob * 100, 2)
-
-    # Tailored Advice Engine ตามเค้าโครงนวัตกรรม
-    if data.glucose <= 0 and risk_percent > 50:
-        advice = "⚠️ AI พบความเสี่ยง: แนะนำให้เภสัชกรทำการตรวจน้ำตาลที่ปลายนิ้ว (POCT) ทันที"
-    elif risk_percent > 70:
-        advice = "🔴 ความเสี่ยงสูง: แนะนำส่งต่อโรงพยาบาลเครือข่ายเพื่อรับการวินิจฉัย"
-    elif risk_percent > 30:
-        advice = "🟡 ความเสี่ยงปานกลาง: ควรปรับพฤติกรรมการบริโภคและออกกำลังกาย"
-    else:
-        advice = "🟢 ความเสี่ยงต่ำ: รักษาสุขภาพและตรวจเช็คประจำปี"
-
-    return {
-        "risk_percent": risk_percent,
-        "bmi": bmi,
-        "wthr": wthr,
-        "advice": advice
-    }
+    result = ai_engine.predict_risk(data)
+    return result
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)

@@ -3,57 +3,74 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Milky-Way | Precision Diabetes AI</title>
+    <title>Milky-Way | AI Diabetes Screening</title>
     <link rel="stylesheet" href="/static/style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;600&family=Plus+Jakarta+Sans:wght@500;700&display=swap" rel="stylesheet">
 </head>
 <body>
-    <div class="container">
+    <div class="main-container">
         <header>
-            <div class="badge">Prevention Key 2025</div>
-            <h1>Milky-Way AI</h1>
-            <p>ระบบคัดกรองเบาหวานอัจฉริยะผ่านร้านยาชุมชน</p>
+            <div class="logo-area">
+                <span class="badge">AI Health Tech</span>
+                <h1>Milky-Way</h1>
+                <p>ระบบคัดกรองความเสี่ยงเบาหวานอัจฉริยะ</p>
+            </div>
         </header>
 
-        <div class="card">
-            <div class="input-row">
+        <div class="card glass-effect">
+            <form id="riskForm" onsubmit="return false;">
+                <div class="form-grid">
+                    <div class="input-group">
+                        <label>น้ำหนัก (kg)</label>
+                        <input type="number" id="weight" placeholder="65.0" step="0.1" required>
+                    </div>
+                    <div class="input-group">
+                        <label>ส่วนสูง (cm)</label>
+                        <input type="number" id="height" placeholder="170" required>
+                    </div>
+                </div>
+
                 <div class="input-group">
-                    <label>น้ำหนัก (kg)</label>
-                    <input type="number" id="weight" placeholder="65.0" step="0.1">
+                    <label>รอบเอว (cm) <small class="hint">*ใช้วัดความอ้วนลงพุง</small></label>
+                    <input type="number" id="waist" placeholder="80" required>
                 </div>
+
                 <div class="input-group">
-                    <label>ส่วนสูง (cm)</label>
-                    <input type="number" id="height" placeholder="170.0" step="0.1">
+                    <div class="label-row">
+                        <label>ค่าน้ำตาล (mg/dL)</label>
+                        <div class="checkbox-wrapper">
+                            <input type="checkbox" id="unknown_glucose" onchange="toggleGlucose()">
+                            <label for="unknown_glucose" class="sm-label">ไม่ทราบผล</label>
+                        </div>
+                    </div>
+                    <input type="number" id="glucose" placeholder="100">
                 </div>
-            </div>
 
-            <div class="input-group">
-                <label>รอบเอว (cm) <small>(เพื่อคำนวณ WtHR)</small></label>
-                <input type="number" id="waist" placeholder="80.0">
-            </div>
-
-            <div class="input-group">
-                <div class="label-flex">
-                    <label>ระดับน้ำตาล (mg/dL)</label>
-                    <label class="toggle-label">
-                        <input type="checkbox" id="no_glucose" onchange="toggleGlucose(this)"> ไม่ทราบผล
-                    </label>
+                <div class="input-group">
+                    <label>อายุ (ปี)</label>
+                    <input type="number" id="age" placeholder="30" required>
                 </div>
-                <input type="number" id="glucose" value="100">
-            </div>
 
-            <div class="input-group">
-                <label>อายุ (ปี)</label>
-                <input type="number" id="age" value="25">
-            </div>
+                <button type="submit" onclick="analyzeRisk()">ประมวลผลด้วย AI</button>
+            </form>
 
-            <button onclick="checkRisk()">วิเคราะห์ความเสี่ยงเชิงรุก</button>
-
-            <div id="result-box" class="result-box">
-                <div id="result-text"></div>
+            <div id="resultArea" class="result-hidden">
+                <div class="result-content">
+                    <div class="score-circle">
+                        <span id="scoreVal">0</span>%
+                        <small>ความเสี่ยง</small>
+                    </div>
+                    <div class="details">
+                        <div id="resultMessage"></div>
+                        <div class="stats-row">
+                            <span>BMI: <b id="bmiVal">-</b></span>
+                            <span>WtHR: <b id="wthrVal">-</b></span>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
-        <footer>ยกระดับคุณภาพชีวิตอย่างยั่งยืน โดยทีม Milky-Way</footer>
+        <footer>Milky-Way Project &copy; 2025</footer>
     </div>
     <script src="/static/script.js"></script>
 </body>
